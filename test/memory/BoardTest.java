@@ -4,8 +4,10 @@
 package memory;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
+import java.io.IOException;
 
 /**
  * TODO
@@ -22,5 +24,16 @@ public class BoardTest {
     }
     
     // TODO tests
+    
+    @Test
+    public void testinit() {
+        try{
+            Board board = Board.parseFromFile("boards/ab.txt");
+            System.out.print(board.toString());
+            assertEquals(board.getSpot(4,4),new Card("C"));
+        }catch(IOException e) {
+            e.printStackTrace();
+        }
+    }
     
 }

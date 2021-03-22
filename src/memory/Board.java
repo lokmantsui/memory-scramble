@@ -4,6 +4,10 @@
 package memory;
 
 import java.io.IOException;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * TODO specification
@@ -22,10 +26,49 @@ public class Board {
      * @throws IOException if an error occurs reading or parsing the file
      */
     public static Board parseFromFile(String filename) throws IOException {
-        throw new RuntimeException("unimplemented");
+        
+        try(BufferedReader br = new BufferedReader(new FileReader(filename))){
+            String str = br.readLine();
+            Matcher m = Pattern.compile("([0-9]+)x([0-9]+)").matcher(str);
+            m.matches();
+            int R = Integer.valueOf(m.group(1));
+            int C = Integer.valueOf(m.group(2));
+            Spot[][] boardarr = new Spot[R][C];
+            for (int r=0;r<R;r++) {
+                for (int c=0;c<C;c++) {
+                    String sym = br.readLine();
+                    boardarr[r][c] = new Card(sym);
+                }
+            }
+            return new Board(R,C,boardarr);
+        }
+    }
+    
+    public Board(int R, int C, Spot[][] boardarr) {
+        this.R = R;
+        this.C = C;
+        this.boardarr = boardarr;
     }
     
     // TODO fields
+    private final int R;
+    private final int C;
+    private Spot[][] boardarr;
+    
+    public Spot getSpot(int i, int j) {
+        return boardarr[i][j];
+    }
+    
+    public String toString() {
+        StringBuilder out = new StringBuilder();
+        for (int i=0;i<R;i++) {
+            for (int j=0;j<C;j++) {
+                out.append(boardarr[i][j].toString()+" ");
+            }
+            out.append("\n");
+        }
+        return out.toString();
+    }
     
     // Abstraction function:
     //   TODO
