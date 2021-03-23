@@ -67,7 +67,10 @@ public class Board {
         }
     }
     
-    
+    /*
+     * Requires 0<=i<R, 0<=j<C
+     * 
+     */
     public Card getCard(int i, int j) {
         checkRep();
         return arr[i][j];
@@ -75,6 +78,8 @@ public class Board {
     
     public void turn(Player player, int i, int j) {
         player.turnOver(getCard(i,j));
+        System.out.println("Player "+player.getName()+" played ("+i+", "+j+"), score:"+player.getScore());
+        System.out.println(toString());
         checkRep();
     }
     

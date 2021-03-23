@@ -7,7 +7,7 @@ import java.util.ArrayList;
  * AF(name, turned, status, score) = player with name name, under status status, who has turned over cards in turned 
  * RI: turned.size()<=2, and ( UNFINISHED or (NOMATCH and turned.size()>0) or (MATCH and turned.size()==2))
  * Safety from rep exposure:
- *    All fields are private
+ *    All fields are private, the mutable List turned is never returned
  * 
  */
 public class Player {
@@ -53,7 +53,6 @@ public class Player {
     public int size() {
         return turned.size();
     }
-    
 
     /*
      * Attempt to turn over card

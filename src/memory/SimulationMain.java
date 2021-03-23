@@ -24,19 +24,23 @@ public class SimulationMain {
         final Board board = Board.parseFromFile(filename);
         final int size = 5;
         final int players = 1;
-        final int tries = 10;
+        final int tries = 50;
         
         for (int ii = 0; ii < players; ii++) {
+            Player player = new Player(String.valueOf(ii)); 
             new Thread(() -> {
                 final Random random = new Random();
-                // TODO set up player ii on the board if necessary
                 
                 for (int jj = 0; jj < tries; jj++) {
                     // TODO try to flip over a first card at (random.nextInt(size), random.nextInt(size))
                     //      which might block until this player can control that card
+                    board.turn(player, random.nextInt(size), random.nextInt(size));
                     
                     // TODO and if that succeeded,
                     //      try to flip over a second card at (random.nextInt(size), random.nextInt(size))
+                    if (player.size()==1) {
+                        board.turn(player, random.nextInt(size), random.nextInt(size));
+                    }
                     
                 }
             }).start();

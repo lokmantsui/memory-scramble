@@ -16,17 +16,15 @@ public class CardTest {
     
     // Testing strategy
     //   Card():
-    //   setOwner():
-    //   relinquish():
-    //   turnFirst():
-    //   turnSecond():
     //   getSymbol():
+    //   setOwner():
+    //   isControlled():
+    //   relinquish():
     //   getOwner():
     //   isUp():
-    //   turnDown():
+    //   setUp():
     //   isEmpty():
     //   remove():
-    //   isControlled():
     //   viewBy():
     //   toString():
     

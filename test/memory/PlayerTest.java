@@ -21,10 +21,8 @@ public class PlayerTest {
     // contains():
     // relinquishAll():
     // size():
-    // match():
+    // turnOver():
     // finish():
-    // setStatus():
-    // getStatus():
     // equals():
     // hashCode():
     
