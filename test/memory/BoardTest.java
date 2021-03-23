@@ -15,7 +15,10 @@ import java.io.IOException;
 public class BoardTest {
     
     // Testing strategy
-    //   TODO
+    //   parseFromFile():
+    //   turn():
+    //   getCard():
+    
     
     @Test
     public void testAssertionsEnabled() {
@@ -30,7 +33,7 @@ public class BoardTest {
         try{
             Board board = Board.parseFromFile("boards/ab.txt");
             System.out.print(board.toString());
-            assertEquals(((Card) board.getCard(4,4)).getSymbol(),"C");
+            assertEquals(((Card) board.getCard(4,4)).getSymbol(),"A");
         }catch(IOException e) {
             e.printStackTrace();
         }

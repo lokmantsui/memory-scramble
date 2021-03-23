@@ -43,8 +43,8 @@ public class PlayerTest {
     public void testaddcontains() {
         Player p1 = new Player("Smith");
         Card c1 = new Card("A");
-        p1.add(c1);
-        assertEquals(true, p1.contains(c1));
+        p1.turnOver(c1);
+//        assertEquals(true, p1.contains(c1));
         assertEquals(1,p1.size());
     }
     

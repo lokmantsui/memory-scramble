@@ -77,8 +77,9 @@ public class Board {
     }
     
     public void turn(Player player, int i, int j) {
-        player.turnOver(getCard(i,j));
-        System.out.println("Player "+player.getName()+" played ("+i+", "+j+"), score:"+player.getScore());
+        Card c = getCard(i,j);
+        System.out.println("Player "+player.getName()+" plays ("+i+", "+j+" ,"+c.getSymbol()+") score: "+player.getScore());
+        player.turnOver(c);
         System.out.println(toString());
         checkRep();
     }
@@ -90,15 +91,32 @@ public class Board {
         assert arr[0].length==C;
     }
     
+    //https://stackoverflow.com/questions/388461/how-can-i-pad-a-string-in-java
+    public static String padRight(String s, int n) {
+        return String.format("%-" + n + "s", s);  
+   }
+    
     @Override
     public String toString() {
         StringBuilder out = new StringBuilder();
         out.append(R+"x"+C+"\n");
         for (int i=0;i<R;i++) {
             for (int j=0;j<C;j++) {
-                out.append(arr[i][j].toString()+" ");
+                out.append(padRight(arr[i][j].toString(),7));
             }
             out.append("\n");
+        }
+        checkRep();
+        return out.toString();
+    }
+    
+    public String viewBy(Player player) {
+        StringBuilder out = new StringBuilder();
+        out.append(R+"x"+C+"\n");
+        for (int i=0;i<R;i++) {
+            for (int j=0;j<C;j++) {
+                out.append(arr[i][j].viewBy(player)+"\n");
+            }
         }
         checkRep();
         return out.toString();

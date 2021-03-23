@@ -24,7 +24,7 @@ public class SimulationMain {
         final Board board = Board.parseFromFile(filename);
         final int size = 5;
         final int players = 1;
-        final int tries = 50;
+        final int tries = 20;
         
         for (int ii = 0; ii < players; ii++) {
             Player player = new Player(String.valueOf(ii)); 
@@ -32,11 +32,11 @@ public class SimulationMain {
                 final Random random = new Random();
                 
                 for (int jj = 0; jj < tries; jj++) {
-                    // TODO try to flip over a first card at (random.nextInt(size), random.nextInt(size))
+                    //  try to flip over a first card at (random.nextInt(size), random.nextInt(size))
                     //      which might block until this player can control that card
                     board.turn(player, random.nextInt(size), random.nextInt(size));
                     
-                    // TODO and if that succeeded,
+                    //  and if that succeeded,
                     //      try to flip over a second card at (random.nextInt(size), random.nextInt(size))
                     if (player.size()==1) {
                         board.turn(player, random.nextInt(size), random.nextInt(size));

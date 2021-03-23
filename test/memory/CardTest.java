@@ -46,8 +46,7 @@ public class CardTest {
     public void testowner() {
         Card card = new Card("A");
         Player p1 = new Player("Simon");
-        card.setUp(true);
-        card.setOwner(p1);
+        p1.turnUpOwnAdd(card);
         assertEquals(card.getOwner(),p1,"got "+card.getOwner());
         assertEquals(card.isControlled(),true);
         card.relinquish();

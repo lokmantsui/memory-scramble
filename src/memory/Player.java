@@ -31,8 +31,10 @@ public class Player {
         return score;
     }
     
-    public void add(Card card) {
+    public void turnUpOwnAdd(Card card) {
+        card.setUp(true);
         turned.add(card);
+        card.setOwner(this);
         checkRep();
     }
     
@@ -43,7 +45,7 @@ public class Player {
     /*
      * Requires all cards in turned are controlled by player
      */
-    public void relinguishAll() {
+    public synchronized void relinguishAll() {
         for (Card c:turned) {
             c.relinquish();
         }
@@ -55,31 +57,27 @@ public class Player {
     }
 
     /*
-     * Attempt to turn over card
+     * Attempt to turn over card. Implements main game mechanics.
      * @param card Card to be turned over
      */
-    public void turnOver(Card card){
+    public synchronized void turnOver(Card card){
         if (status!=Status.UNFINISHED) {
             finish();
         }
         if (size()==0) {
-            if (card.isEmpty()) {//1-A
+            if (card.isEmpty()) {//1-A Empty card
                 return ;
             }
-            card.setUp(true);
-            add(card);
-            card.setOwner(this);//1-BCD
+            turnUpOwnAdd(card);// 1-BCD down card, up not controlled, up controlled
         }else if (size()==1) {
             status = Status.NOMATCH;
             if (!card.isEmpty() && !(card.isUp() && card.isControlled())) { //2-CDE
-                card.setUp(true);
-                add(card);
-                card.setOwner(this); //should not block
-                if (turned.get(0).getSymbol().equals(turned.get(1).getSymbol())) {
+                turnUpOwnAdd(card); //2-CDE down card, up not controlled, should not block
+                if (turned.get(0).getSymbol().equals(turned.get(1).getSymbol())) { //2-D Matched
                     status = Status.MATCH;
-                }
-            }
-            if (status==Status.NOMATCH) { //2-ABE
+                } //2-E not Matched
+            } //2-B up controlled
+            if (status==Status.NOMATCH) { //2-ABCE Empty card, up controlled, down not matched, up not matched
                 relinguishAll();
             }
         }else {
@@ -91,14 +89,14 @@ public class Player {
     /*
      * Finish previous play (3-AB)
      */
-    public void finish() {
-        if (status==Status.MATCH) { //3-A
+    public synchronized void finish() {
+        if (status==Status.MATCH) { //3-A Matched
             for (Card c:turned) {
                 c.remove();
             }
             relinguishAll();
             score+=1;
-        }else { //3-B
+        }else { //3-B Not matched
             for (Card c:turned) {
                 if (!c.isEmpty() && c.isUp() && !c.isControlled()) {
                     c.setUp(false);

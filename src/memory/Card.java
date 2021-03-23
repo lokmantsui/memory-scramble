@@ -2,6 +2,7 @@ package memory;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.lang.Exception;
 
 /**
  * AF(symbol, isUp, isEmpty, owner): 
@@ -9,7 +10,7 @@ import java.util.concurrent.ArrayBlockingQueue;
  *          card carrying symbol, which faces up/down if isUp is true/false, which belongs to player owner.
  *      if isEmpty:
  *          empty card slot
- * RI: if owner is non-empty: !isEmpty and isUp and owner.contains(card)
+ * RI: if owner is non-empty: !isEmpty and isUp //and owner.contains(card)
  * 
  * @author lt
  *
@@ -35,7 +36,8 @@ public class Card {
     
     /*
      * Set owner of card. Blocks if card is already owned by another player.
-     * TODO: if player 2 blocks here, should not block owner to relinquish control to avoid deadlock
+     * TODO: if non-owner blocks here, should not block owner to relinquish control to avoid deadlock
+     * if card was removed while player is waiting, should abort
      */
     public void setOwner(Player player) {
         try{
@@ -51,15 +53,10 @@ public class Card {
     }
     
     /*
-     * Relinquish control of the card. The card must be under control.
+     * Relinquish control of the card.
      */
-    public void relinquish() {
-        assert isControlled();
-        try{
-            owner.take();
-        }catch(InterruptedException e) {
-            e.printStackTrace();
-        }
+    public synchronized void relinquish() {
+        owner.clear();
         checkRep();
     }
     
@@ -74,7 +71,7 @@ public class Card {
         return isUp;
     }
     
-    public void setUp(boolean result) {
+    public synchronized void setUp(boolean result) {
         isUp = result;
     }
     
@@ -99,7 +96,7 @@ public class Card {
         else return "up "+symbol;
     }
     
-    private void checkRep() {
+    private synchronized void checkRep() {
         if (isControlled()) {
             assert !isEmpty;
             assert isUp;
@@ -111,6 +108,8 @@ public class Card {
     public String toString(){
         if (isEmpty) return "none";
         String face = isUp? "up" : "down";
-        return face+" "+symbol;
+        Player player = getOwner();
+        String playerID = player==null? "":player.getName();
+        return face+" "+symbol+playerID;
         }
 }
