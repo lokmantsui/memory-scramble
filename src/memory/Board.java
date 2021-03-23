@@ -6,6 +6,7 @@ package memory;
 import java.io.IOException;
 import java.io.BufferedReader;
 import java.io.FileReader;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -17,6 +18,28 @@ import java.util.regex.Pattern;
  *    {@link #parseFromFile(String)} may not be changed.
  */
 public class Board {
+    // Abstraction function:
+    //   AF(R,C,arr) = board with R rows and C columns, with cards at i th row and j th column stored as arr[i][j]
+    // Representation invariant:
+    //   R>0 and C>0 and dimension(arr) = R x C
+    // Safety from rep exposure:
+    //   All fields are private final
+    // Thread safety argument:
+    //   TODO
+
+    private final int R;
+    private final int C;
+    private final Card[][] arr;
+        
+    /*
+     * private Constructor: can only construct instance through parseFromFile
+     */
+    private Board(int R, int C, Card[][] arr) {
+        this.R = R;
+        this.C = C;
+        this.arr = arr;
+        checkRep();
+    }
     
     /**
      * Make a new board by parsing a file.
@@ -33,56 +56,47 @@ public class Board {
             m.matches();
             int R = Integer.valueOf(m.group(1));
             int C = Integer.valueOf(m.group(2));
-            Spot[][] boardarr = new Spot[R][C];
-            for (int r=0;r<R;r++) {
-                for (int c=0;c<C;c++) {
+            Card[][] arr = new Card[R][C];
+            for (int i=0;i<R;i++) {
+                for (int j=0;j<C;j++) {
                     String sym = br.readLine();
-                    boardarr[r][c] = new Card(sym);
+                    arr[i][j] = new Card(sym);
                 }
             }
-            return new Board(R,C,boardarr);
+            return new Board(R,C,arr);
         }
     }
     
-    public Board(int R, int C, Spot[][] boardarr) {
-        this.R = R;
-        this.C = C;
-        this.boardarr = boardarr;
+    
+    public Card getCard(int i, int j) {
+        checkRep();
+        return arr[i][j];
     }
     
-    // TODO fields
-    private final int R;
-    private final int C;
-    private Spot[][] boardarr;
-    
-    public Spot getSpot(int i, int j) {
-        return boardarr[i][j];
+    public void turn(Player player, int i, int j) {
+        player.turnOver(getCard(i,j));
+        checkRep();
     }
     
+    private void checkRep() {
+        assert R>0;
+        assert C>0;
+        assert arr.length==R;
+        assert arr[0].length==C;
+    }
+    
+    @Override
     public String toString() {
         StringBuilder out = new StringBuilder();
+        out.append(R+"x"+C+"\n");
         for (int i=0;i<R;i++) {
             for (int j=0;j<C;j++) {
-                out.append(boardarr[i][j].toString()+" ");
+                out.append(arr[i][j].toString()+" ");
             }
             out.append("\n");
         }
+        checkRep();
         return out.toString();
     }
-    
-    // Abstraction function:
-    //   TODO
-    // Representation invariant:
-    //   TODO
-    // Safety from rep exposure:
-    //   TODO
-    // Thread safety argument:
-    //   TODO
-    
-    // TODO constructor(s)
-    
-    // TODO checkRep
-    
-    // TODO other methods
-    
+
 }

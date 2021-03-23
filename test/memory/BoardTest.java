@@ -30,7 +30,7 @@ public class BoardTest {
         try{
             Board board = Board.parseFromFile("boards/ab.txt");
             System.out.print(board.toString());
-            assertEquals(board.getSpot(4,4),new Card("C"));
+            assertEquals(((Card) board.getCard(4,4)).getSymbol(),"C");
         }catch(IOException e) {
             e.printStackTrace();
         }
