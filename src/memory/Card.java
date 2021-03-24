@@ -96,7 +96,7 @@ public class Card {
     public String viewBy(Player player) {
         if (isEmpty) return "none";
         if (!isUp) return "down";
-        else if (player.equals(getOwner())) return "my "+symbol;
+        else if (getOwner()!=null && player.equals(getOwner())) return "my "+symbol;
         else return "up "+symbol;
     }
     
