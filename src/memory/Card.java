@@ -15,19 +15,12 @@ package memory;
 
 public class Card {
     private final String symbol;
-    private Board board;
     private boolean isUp = false;
     private boolean isEmpty = false;
     private Player owner;
     
     public Card(String symbol) {
         this.symbol = symbol;
-        checkRep();
-    }
-    
-    public Card(String symbol, Board board) {
-        this.symbol = symbol;
-        this.board = board;
         checkRep();
     }
     
@@ -38,7 +31,7 @@ public class Card {
         return "";
     }
     
-    /*
+    /**
      * Set owner of card. Blocks if card is already owned by another player.
      */
     public synchronized void setOwner(Player player) throws EmptyCardException{
@@ -60,16 +53,16 @@ public class Card {
         return owner!=null;
     }
     
-    /*
-     * Relinquish control of the card.
+    /**
+     * Relinquish control of the card. Wakes one waiting thread.
      */
     public synchronized void relinquish() {
         owner=null;
-        checkRep();
         notify();
+        checkRep();
     }
     
-    /*
+    /**
      * Returns owner, or null if owner is empty
      */
     public Player getOwner() {
@@ -83,20 +76,22 @@ public class Card {
     public void setUp(boolean result) {
         boolean prev = isUp;
         isUp = result;
-        if (board!=null && prev!=isUp) board.notifyChange();
     }
     
     public boolean isEmpty() {
         return isEmpty;
     }
     
+    /**
+     *  Removes card. Also wakes all waiting threads.
+     * 
+     */
     public synchronized void remove() {
         isEmpty = true;
         notifyAll();
-        if (board!=null) board.notifyChange();
     }
     
-    /*
+    /**
      * String representation of card viewed from a player's perspective
      * @param player
      * @return string rep of card

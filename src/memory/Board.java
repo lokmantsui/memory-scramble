@@ -20,8 +20,8 @@ import java.util.regex.Pattern;
  */
 public class Board {
     // Abstraction function:
-    //   AF(R,C,arr) = board with R rows and C columns, with cards at i th row and j th column
-    //        stored as arr[i][j]
+    //   AF(R,C,arr, playerDir) = board with R rows and C columns, with cards at i th row and j th column
+    //        stored as arr[i][j], with players' names/Players stored in playerDir's keys/values.
     // Representation invariant:
     //   R>0 and C>0 and dimension(arr) = R x C
     // Safety from rep exposure:
@@ -33,6 +33,7 @@ public class Board {
     private final int C;
     private final Card[][] arr;
     private final ConcurrentMap<String,Player> playerDir=new ConcurrentHashMap<String,Player>();
+    private final Object eventNotifier = new Object();
         
     /*
      * private Constructor: can only construct instance through parseFromFile
@@ -64,14 +65,14 @@ public class Board {
             for (int i=0;i<R;i++) {
                 for (int j=0;j<C;j++) {
                     String sym = br.readLine();
-                    arr[i][j] = new Card(sym,board);
+                    arr[i][j] = new Card(sym);
                 }
             }
             return board;
         }
     }
     
-    /*
+    /**
      * Requires 0<=i<R, 0<=j<C
      * 
      */
@@ -80,21 +81,32 @@ public class Board {
         return arr[i][j];
     }
     
+    
+    /**
+     * Modifies Player and Card states when player tries to flip a card.
+     * Called by flip/<player>/i,j
+     * @param player
+     * @param i row number of card
+     * @param j column number of card
+     */
+    public void turn(Player player, int i, int j) {
+        Card c = getCard(i,j);
+        System.out.println("Player "+player.getName()+" plays ("+i+", "+j+" ,"+c.getSymbol()+") score: "+player.getScore());
+        player.turnOver(c,eventNotifier);
+        System.out.println(toString());
+        checkRep();
+    }
+    
+    /**
+     * Register player's name. Stored in playerDir.
+     */
     public void registerPlayer(String name) {
         if (playerDir.containsKey(name)) return;
         Player player = new Player(name);
         playerDir.put(name, player);
     }
     
-    public void turn(Player player, int i, int j) {
-        Card c = getCard(i,j);
-        System.out.println("Player "+player.getName()+" plays ("+i+", "+j+" ,"+c.getSymbol()+") score: "+player.getScore());
-        player.turnOver(c);
-        System.out.println(toString());
-        checkRep();
-    }
-    
-    /*
+    /**
      * Get a Player from his/her name
      * @param name
      * @return player
@@ -130,6 +142,12 @@ public class Board {
         return out.toString();
     }
     
+    /**
+     * Output for look/<player>
+     * 
+     * @param player Point of view of output
+     * @return output for look/<player>
+     */
     public String viewBy(Player player) {
         StringBuilder out = new StringBuilder();
         out.append(R+"x"+C+"\n");
@@ -142,17 +160,23 @@ public class Board {
         return out.toString();
     }
     
-    public synchronized String watch(Player player) {
+    /**
+     *  Output for watch/<player>.
+     *  Returns viewBy upon getting change notification.
+     *  
+     *  @param player Point of view of output
+     *  @return output for watch/<player>
+     */
+    
+    public String watch(Player player) {
         try{
-            wait();
+            synchronized (eventNotifier) {
+                eventNotifier.wait();
+            }
         }catch(InterruptedException e) {
             e.printStackTrace();
         }
         return viewBy(player);
     }
     
-    public synchronized void notifyChange() {
-        notifyAll();
-    }
-
 }

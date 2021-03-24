@@ -43,10 +43,11 @@ public class CardTest {
     }
     
     @Test
-    public void testowner() {
+    public void testowner()throws IOException  {
         Card card = new Card("A");
         Player p1 = new Player("Simon");
-        p1.turnOver(card);
+        Board b = Board.parseFromFile("boards/ab.txt");
+        p1.turnOver(card,b);
         assertEquals(card.getOwner(),p1,"got "+card.getOwner());
         assertEquals(card.isControlled(),true);
         card.relinquish();
@@ -55,10 +56,11 @@ public class CardTest {
     
    
     @Test
-    public void testviewBy() {
+    public void testviewBy()throws IOException  {
         Card card = new Card("A");
         Player p1 = new Player("Simon");
-        p1.turnOver(card);
+        Board b = Board.parseFromFile("boards/ab.txt");
+        p1.turnOver(card,b);
         assertEquals(p1,card.getOwner());
         assertEquals(card.viewBy(p1),"my A");
         assertEquals(card.viewBy(new Player("Simon")),"my A");

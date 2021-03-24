@@ -3,7 +3,7 @@ package memory;
 import java.util.List;
 import java.util.ArrayList;
 
-/*
+/**
  * AF(name, turned, status, score) = player with name name, under status status, who has turned over cards in turned 
  * RI: turned.size()<=2, and ( UNFINISHED or (NOMATCH and turned.size()>0) or (MATCH and turned.size()==2))
  * Safety from rep exposure:
@@ -35,7 +35,7 @@ public class Player {
         return turned.contains(card);
     }
     
-    /*
+    /**
      * Requires all cards in turned are controlled by player
      */
     private void relinguishAll() {
@@ -49,24 +49,21 @@ public class Player {
         return turned.size();
     }
 
-    /*
+    /**
      * Attempt to turn over card. Implements main game mechanics.
      * @param card Card to be turned over
+     * @param board Callback board.notifyChange() to send change notification
      */
-    public synchronized void turnOver(Card card){
+    public synchronized void turnOver(Card card, Object eventNotifier){
         if (status!=Status.UNFINISHED) {
-            finish();
+            finish(eventNotifier); //3-AB
         }
         if (size()==0) {
             if (card.isEmpty()) {//1-A Empty card
                 return ;
             }
             try{
-                if (!card.isUp()) {// 1-B down card
-                    card.setUp(true);
-                }
-                card.setOwner(this); //1-CD, up not controlled, up controlled, may block
-                turned.add(card);
+                takeOwnership(card, eventNotifier);// 1-BCD, may block
             }catch(EmptyCardException e) {
                 return ;
             }
@@ -74,11 +71,7 @@ public class Player {
             status = Status.NOMATCH;
             if (!card.isEmpty() && !(card.isUp() && card.isControlled())) { //2-CDE
                 try{
-                    if (!card.isUp()) {// 2-C down card
-                        card.setUp(true);
-                    }
-                    card.setOwner(this); //2-DE up not controlled, should not block
-                    turned.add(card);
+                    takeOwnership(card, eventNotifier);// 2-CDE, should not block
                 }catch(EmptyCardException e) {
                     throw new RuntimeException("should not reach here");
                 }
@@ -94,20 +87,45 @@ public class Player {
         }
     }
     
-    /*
-     * Finish previous play (3-AB)
+    /**
+     * Attempts to take ownership of a card. 
+     * 
+     * @param card Card to be taken over. Requires card to be non-empty and uncontrolled.
+     * @param eventNotifier Callback to get change notification by calling eventNotifier.notifyAll();
      */
-    private void finish() {
+    private void takeOwnership(Card card, Object eventNotifier) throws EmptyCardException{
+        if (!card.isUp()) {//1-B down card; 2-C down card,
+            card.setUp(true);
+            synchronized (eventNotifier) {
+                eventNotifier.notifyAll();
+            }
+        }
+        card.setOwner(this);//1-CD, up not controlled(no block), up controlled (block); 2-DE up not controlled (no block)
+        turned.add(card);
+    }
+    
+    /**
+     * Finish previous play (3-AB). Requires status != UNFINISHED.
+     * 
+     * @param eventNotifier Callback to get change notification by calling eventNotifier.notifyAll();
+     */
+    private void finish(Object eventNotifier) {
         if (status==Status.MATCH) { //3-A Matched
             relinguishAll();
             for (Card c:turned) {
                 c.remove();
+                synchronized (eventNotifier) {
+                    eventNotifier.notifyAll();
+                }
             }
             score+=1;
         }else { //3-B Not matched
             for (Card c:turned) {
                 if (!c.isEmpty() && c.isUp() && !c.isControlled()) {
                     c.setUp(false);
+                    synchronized (eventNotifier) {
+                        eventNotifier.notifyAll();
+                    }
                 }
             }
         }

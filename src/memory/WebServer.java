@@ -170,7 +170,6 @@ public class WebServer {
     private void handleLook(Board board, HttpExchange exchange) throws IOException {
         final String path = exchange.getRequestURI().getPath();
         final String base = exchange.getHttpContext().getPath();
-        assert path.startsWith(base);
         
         final String playerName = path.substring(base.length());
         board.registerPlayer(playerName);
@@ -186,7 +185,6 @@ public class WebServer {
 
         out.println(response);
         
-        // if you do not close the exchange, the response will not be sent!
         exchange.close();
     }
     
@@ -200,7 +198,6 @@ public class WebServer {
     private void handleFlip(Board board, HttpExchange exchange) throws IOException {
         final String path = exchange.getRequestURI().getPath();
         final String base = exchange.getHttpContext().getPath();
-        assert path.startsWith(base);
         
         final String str = path.substring(base.length());
         Matcher m = Pattern.compile("(\\w+)/([0-9]+),([0-9]+)").matcher(str);
@@ -222,7 +219,6 @@ public class WebServer {
 
         out.println(response);
         
-        // if you do not close the exchange, the response will not be sent!
         exchange.close();
     }
     
@@ -236,7 +232,6 @@ public class WebServer {
     private void handleWatch(Board board, HttpExchange exchange) throws IOException {
         final String path = exchange.getRequestURI().getPath();
         final String base = exchange.getHttpContext().getPath();
-        assert path.startsWith(base);
         
         final String playerName = path.substring(base.length());
         board.registerPlayer(playerName);
@@ -252,7 +247,6 @@ public class WebServer {
 
         out.println(response);
         
-        // if you do not close the exchange, the response will not be sent!
         exchange.close();
     }
 }

@@ -40,19 +40,21 @@ public class PlayerTest {
         assertEquals("Smith", p1.getName());
     }
     
-    public void testaddcontains() {
+    public void testaddcontains() throws IOException{
+        Board b = Board.parseFromFile("boards/ab.txt");
         Player p1 = new Player("Smith");
         Card c1 = new Card("A");
-        p1.turnOver(c1);
+        p1.turnOver(c1,b);
 //        assertEquals(true, p1.contains(c1));
         assertEquals(1,p1.size());
     }
     
     @Test
-    public void testTurnOver() {
+    public void testTurnOver() throws IOException{
+        Board b = Board.parseFromFile("boards/ab.txt");
         Card c1 = new Card("A");
         Player p1 = new Player("Simon");
-        p1.turnOver(c1); //1-B
+        p1.turnOver(c1,b); //1-B
         assertEquals(c1.getOwner(),p1);
         assertEquals(c1.isUp(),true);
         assertEquals(p1.size(),1);
@@ -60,26 +62,26 @@ public class PlayerTest {
         c2.remove();
         assertEquals(c2.isEmpty(),true);
         Player p2 = new Player("James");
-        p2.turnOver(c2); //1-A
+        p2.turnOver(c2,b); //1-A
         assertEquals(p2.size(),0);
         assertEquals(c2.isControlled(),false);
         assertEquals(c2.getOwner()==null,true);
         Card c3 = new Card("B");
         assertEquals(c3.isUp(),false);
-        p1.turnOver(c3); //2-E
+        p1.turnOver(c3,b); //2-E
         assertEquals(c3.isUp(),true); //2-C
         assertEquals(p1.size(),2);
         assertEquals(c1.isControlled(),false);
         assertEquals(c3.isControlled(),false);
         assertEquals(p1.getScore(),0);
         Card c4 = new Card("A");
-        p1.turnOver(c4); //3-B
+        p1.turnOver(c4,b); //3-B
         assertEquals(c1.isUp(),false);
         assertEquals(c3.isUp(),false);
-        p1.turnOver(c1); //2-D
+        p1.turnOver(c1,b); //2-D
         assertEquals(c1.isControlled(),true);
         assertEquals(c4.isControlled(),true);
-        p1.turnOver(c3); //3-A
+        p1.turnOver(c3,b); //3-A
         assertEquals(c1.isEmpty(),true);
         assertEquals(c4.isEmpty(),true);
         assertEquals(c1.isControlled(),false);

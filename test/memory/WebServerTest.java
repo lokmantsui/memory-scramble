@@ -14,6 +14,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
@@ -72,5 +73,33 @@ public class WebServerTest {
     }
     
     // TODO tests
+    public void testIO(Board board, String input, List<String> outputs) throws IOException, URISyntaxException {
+        final WebServer server = new WebServer(board, 0);
+        server.start();
+        
+        final URL valid = new URL("http://localhost:" + server.port() + input);
+        
+        // in this test, we will just assert correctness of the server's output
+        final InputStream inputstream = valid.openStream();
+        final BufferedReader reader = new BufferedReader(new InputStreamReader(inputstream, UTF_8));
+        for (String output:outputs) {
+            assertEquals(output, reader.readLine());
+        }
+        assertEquals("", reader.readLine());
+        assertEquals(null, reader.readLine(), "end of stream");
+        server.stop();
+    }
+    
+    @Test
+    public void testExample() throws IOException, URISyntaxException{
+        Board board = Board.parseFromFile("boards/example.txt");
+        testIO(board,"/flip/Alice/0,0",List.of("3x3","my R","down","down","down","down","down","down","down","down"));
+        testIO(board,"/flip/Alice/2,2",List.of("3x3","up R","down","down","down","down","down","down","down","up P"));
+        testIO(board,"/flip/Bob/0,0",List.of("3x3","my R","down","down","down","down","down","down","down","up P"));
+        testIO(board,"/flip/Alice/1,1",List.of("3x3","up R","down","down","down","my Y","down","down","down","down"));
+        testIO(board,"/flip/Bob/0,2",List.of("3x3","my R","down","my R","down","up Y","down","down","down","down"));
+        testIO(board,"/flip/Bob/1,0",List.of("3x3","none","down","none","my G","up Y","down","down","down","down"));
+    }
+            
     
 }
