@@ -33,8 +33,6 @@ public class Card {
     
     /*
      * Set owner of card. Blocks if card is already owned by another player.
-     * TODO: if non-owner blocks here, should not block owner to relinquish control to avoid deadlock
-     * if card was removed while player is waiting, should abort
      */
     public synchronized void setOwner(Player player) throws EmptyCardException{
         try{
@@ -61,7 +59,7 @@ public class Card {
     public synchronized void relinquish() {
         owner=null;
         checkRep();
-        notifyAll();
+        notify();
     }
     
     /*

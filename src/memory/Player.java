@@ -98,7 +98,7 @@ public class Player {
             for (Card c:turned) {
                 c.remove();
             }
-            relinguishAll(); //TODO: tell waiting threads to abort
+            relinguishAll();
             score+=1;
         }else { //3-B Not matched
             for (Card c:turned) {
