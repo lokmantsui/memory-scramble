@@ -6,7 +6,8 @@ package memory;
 import java.io.IOException;
 import java.io.BufferedReader;
 import java.io.FileReader;
-
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -19,7 +20,8 @@ import java.util.regex.Pattern;
  */
 public class Board {
     // Abstraction function:
-    //   AF(R,C,arr) = board with R rows and C columns, with cards at i th row and j th column stored as arr[i][j]
+    //   AF(R,C,arr) = board with R rows and C columns, with cards at i th row and j th column
+    //        stored as arr[i][j]
     // Representation invariant:
     //   R>0 and C>0 and dimension(arr) = R x C
     // Safety from rep exposure:
@@ -30,6 +32,7 @@ public class Board {
     private final int R;
     private final int C;
     private final Card[][] arr;
+    private final ConcurrentMap<String,Player> playerDir=new ConcurrentHashMap<String,Player>();
         
     /*
      * private Constructor: can only construct instance through parseFromFile
@@ -76,12 +79,27 @@ public class Board {
         return arr[i][j];
     }
     
+    public void registerPlayer(String name) {
+        Player player = new Player(name);
+        playerDir.putIfAbsent(name, player);
+    }
+    
     public void turn(Player player, int i, int j) {
         Card c = getCard(i,j);
         System.out.println("Player "+player.getName()+" plays ("+i+", "+j+" ,"+c.getSymbol()+") score: "+player.getScore());
         player.turnOver(c);
         System.out.println(toString());
         checkRep();
+    }
+    
+    /*
+     * Get a Player from his/her name
+     * @param name
+     * @return player
+     * 
+     */
+    public Player getPlayer(String name) {
+        return playerDir.get(name);
     }
     
     private void checkRep() {

@@ -13,6 +13,8 @@ import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.sun.net.httpserver.Filter;
 import com.sun.net.httpserver.HttpContext;
@@ -80,9 +82,13 @@ public class WebServer {
         //   (do this on all your handlers)
         hello.getFilters().addAll(filters);
         
-        // TODO handle requests for /look/player
+        // handle requests for /look/player
+        HttpContext look = server.createContext("/look/", exchange -> handleLook(board,exchange));
+        look.getFilters().addAll(filters);
         
-        // TODO handle requests for /flip/player/row,column
+        // handle requests for /flip/player/row,column
+        HttpContext flip = server.createContext("/flip/", exchange -> handleFlip(board,exchange));
+        flip.getFilters().addAll(filters);
         
         // TODO handle requests for /watch/player
     }
@@ -146,6 +152,73 @@ public class WebServer {
         PrintWriter out = new PrintWriter(new OutputStreamWriter(body, UTF_8), true);
         // println(..) will append a newline and auto-flush
         // - to write without a newline, use e.g. print(..) and flush()
+        out.println(response);
+        
+        // if you do not close the exchange, the response will not be sent!
+        exchange.close();
+    }
+    
+    /*
+     * Handle a request for /look/<playerName> by responding with string representation of
+     * board viewed by player
+     * 
+     * @param exchange HTTP request/response, modified by this method to send a
+     *                 response to the client and close the exchange
+     */
+    private void handleLook(Board board, HttpExchange exchange) throws IOException {
+        final String path = exchange.getRequestURI().getPath();
+        
+        final String base = exchange.getHttpContext().getPath();
+        assert path.startsWith(base);
+        
+        final String playerName = path.substring(base.length());
+        final Player player = board.getPlayer(playerName);
+        
+        final String response;
+        
+        exchange.sendResponseHeaders(200, 0);
+        response = board.viewBy(player);
+            
+        OutputStream body = exchange.getResponseBody();
+        PrintWriter out = new PrintWriter(new OutputStreamWriter(body, UTF_8), true);
+
+        out.println(response);
+        
+        // if you do not close the exchange, the response will not be sent!
+        exchange.close();
+    }
+    
+    /*
+     * Handle a request for /flip/<playerName>/<row>,<col> by modifying the game state and
+     * responding with string representation of board viewed by player
+     * 
+     * @param exchange HTTP request/response, modified by this method to send a
+     *                 response to the client and close the exchange
+     */
+    private void handleFlip(Board board, HttpExchange exchange) throws IOException {
+        final String path = exchange.getRequestURI().getPath();
+        
+        final String base = exchange.getHttpContext().getPath();
+        assert path.startsWith(base);
+        
+        final String str = path.substring(base.length());
+        Matcher m = Pattern.compile("(\\w+)/([0-9]+),([0-9]+)").matcher(str);
+        m.matches();
+        String playerName = m.group(1);
+        int r = Integer.valueOf(m.group(2));
+        int c = Integer.valueOf(m.group(3));
+        board.registerPlayer(playerName);
+        final Player player = board.getPlayer(playerName);
+        
+        board.turn(player, r, c);
+        
+        final String response;
+        exchange.sendResponseHeaders(200, 0);
+        response = board.viewBy(player);
+            
+        OutputStream body = exchange.getResponseBody();
+        PrintWriter out = new PrintWriter(new OutputStreamWriter(body, UTF_8), true);
+
         out.println(response);
         
         // if you do not close the exchange, the response will not be sent!
