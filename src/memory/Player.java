@@ -38,7 +38,7 @@ public class Player {
     /*
      * Requires all cards in turned are controlled by player
      */
-    public synchronized void relinguishAll() {
+    private void relinguishAll() {
         for (Card c:turned) {
             c.relinquish();
         }
@@ -62,8 +62,10 @@ public class Player {
                 return ;
             }
             try{
-                card.setUp(true);// 1-B down card
-                card.setOwner(this); //1-CD, up not controlled, up controlled
+                if (!card.isUp()) {// 1-B down card
+                    card.setUp(true);
+                }
+                card.setOwner(this); //1-CD, up not controlled, up controlled, may block
                 turned.add(card);
             }catch(EmptyCardException e) {
                 return ;
@@ -72,7 +74,9 @@ public class Player {
             status = Status.NOMATCH;
             if (!card.isEmpty() && !(card.isUp() && card.isControlled())) { //2-CDE
                 try{
-                    card.setUp(true);// 2-C down card
+                    if (!card.isUp()) {// 2-C down card
+                        card.setUp(true);
+                    }
                     card.setOwner(this); //2-DE up not controlled, should not block
                     turned.add(card);
                 }catch(EmptyCardException e) {
@@ -93,12 +97,12 @@ public class Player {
     /*
      * Finish previous play (3-AB)
      */
-    public synchronized void finish() {
+    private void finish() {
         if (status==Status.MATCH) { //3-A Matched
+            relinguishAll();
             for (Card c:turned) {
                 c.remove();
             }
-            relinguishAll();
             score+=1;
         }else { //3-B Not matched
             for (Card c:turned) {

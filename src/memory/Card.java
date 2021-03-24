@@ -18,7 +18,7 @@ public class Card {
     private Board board;
     private boolean isUp = false;
     private boolean isEmpty = false;
-    private Player owner = null;
+    private Player owner;
     
     public Card(String symbol) {
         this.symbol = symbol;
@@ -35,7 +35,7 @@ public class Card {
         if (!isEmpty) {
             return symbol;
         }
-        return null;
+        return "";
     }
     
     /*
@@ -90,8 +90,9 @@ public class Card {
         return isEmpty;
     }
     
-    public void remove() {
+    public synchronized void remove() {
         isEmpty = true;
+        notifyAll();
         if (board!=null) board.notifyChange();
     }
     
@@ -104,7 +105,7 @@ public class Card {
     public String viewBy(Player player) {
         if (isEmpty) return "none";
         if (!isUp) return "down";
-        else if (getOwner()!=null && player.equals(getOwner())) return "my "+symbol;
+        else if (isControlled() && player.equals(getOwner())) return "my "+symbol;
         else return "up "+symbol;
     }
     
@@ -119,8 +120,7 @@ public class Card {
     public String toString(){
         if (isEmpty) return "none";
         String face = isUp? "up" : "down";
-        Player player = getOwner();
-        String playerID = player==null? "":player.getName();
-        return face+playerID+" "+symbol;
+        String playerName = isControlled()? getOwner().getName():"";
+        return face+playerName+" "+symbol;
         }
 }

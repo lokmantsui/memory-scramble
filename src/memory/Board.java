@@ -81,8 +81,9 @@ public class Board {
     }
     
     public void registerPlayer(String name) {
+        if (playerDir.containsKey(name)) return;
         Player player = new Player(name);
-        playerDir.putIfAbsent(name, player);
+        playerDir.put(name, player);
     }
     
     public void turn(Player player, int i, int j) {
