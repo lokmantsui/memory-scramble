@@ -81,8 +81,9 @@ public class Card {
     }
     
     public void setUp(boolean result) {
+        boolean prev = isUp;
         isUp = result;
-        if (board!=null) board.notifyChange();
+        if (board!=null && prev!=isUp) board.notifyChange();
     }
     
     public boolean isEmpty() {
