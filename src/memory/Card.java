@@ -15,12 +15,19 @@ package memory;
 
 public class Card {
     private final String symbol;
+    private Board board;
     private boolean isUp = false;
     private boolean isEmpty = false;
     private Player owner = null;
     
     public Card(String symbol) {
         this.symbol = symbol;
+        checkRep();
+    }
+    
+    public Card(String symbol, Board board) {
+        this.symbol = symbol;
+        this.board = board;
         checkRep();
     }
     
@@ -75,6 +82,7 @@ public class Card {
     
     public void setUp(boolean result) {
         isUp = result;
+        if (board!=null) board.notifyChange();
     }
     
     public boolean isEmpty() {
@@ -83,6 +91,7 @@ public class Card {
     
     public void remove() {
         isEmpty = true;
+        if (board!=null) board.notifyChange();
     }
     
     /*

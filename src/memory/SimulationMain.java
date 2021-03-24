@@ -45,5 +45,11 @@ public class SimulationMain {
                 }
             }).start();
         }
+//        new Thread(()->{
+//            Player player = new Player("X"); 
+//            while (true) {
+//                board.watch(player);
+//            }
+//        }).start();
     }
 }

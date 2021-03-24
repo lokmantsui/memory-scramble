@@ -60,13 +60,14 @@ public class Board {
             int R = Integer.valueOf(m.group(1));
             int C = Integer.valueOf(m.group(2));
             Card[][] arr = new Card[R][C];
+            Board board = new Board(R,C,arr);
             for (int i=0;i<R;i++) {
                 for (int j=0;j<C;j++) {
                     String sym = br.readLine();
-                    arr[i][j] = new Card(sym);
+                    arr[i][j] = new Card(sym,board);
                 }
             }
-            return new Board(R,C,arr);
+            return board;
         }
     }
     
@@ -138,6 +139,19 @@ public class Board {
         }
         checkRep();
         return out.toString();
+    }
+    
+    public synchronized String watch(Player player) {
+        try{
+            wait();
+        }catch(InterruptedException e) {
+            e.printStackTrace();
+        }
+        return viewBy(player);
+    }
+    
+    public synchronized void notifyChange() {
+        notifyAll();
     }
 
 }

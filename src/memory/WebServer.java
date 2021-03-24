@@ -90,7 +90,9 @@ public class WebServer {
         HttpContext flip = server.createContext("/flip/", exchange -> handleFlip(board,exchange));
         flip.getFilters().addAll(filters);
         
-        // TODO handle requests for /watch/player
+        // handle requests for /watch/player
+        HttpContext watch = server.createContext("/watch/", exchange -> handleWatch(board,exchange));
+        watch.getFilters().addAll(filters);
     }
     
     // TODO checkRep
@@ -167,11 +169,11 @@ public class WebServer {
      */
     private void handleLook(Board board, HttpExchange exchange) throws IOException {
         final String path = exchange.getRequestURI().getPath();
-        
         final String base = exchange.getHttpContext().getPath();
         assert path.startsWith(base);
         
         final String playerName = path.substring(base.length());
+        board.registerPlayer(playerName);
         final Player player = board.getPlayer(playerName);
         
         final String response;
@@ -197,7 +199,6 @@ public class WebServer {
      */
     private void handleFlip(Board board, HttpExchange exchange) throws IOException {
         final String path = exchange.getRequestURI().getPath();
-        
         final String base = exchange.getHttpContext().getPath();
         assert path.startsWith(base);
         
@@ -215,6 +216,36 @@ public class WebServer {
         final String response;
         exchange.sendResponseHeaders(200, 0);
         response = board.viewBy(player);
+            
+        OutputStream body = exchange.getResponseBody();
+        PrintWriter out = new PrintWriter(new OutputStreamWriter(body, UTF_8), true);
+
+        out.println(response);
+        
+        // if you do not close the exchange, the response will not be sent!
+        exchange.close();
+    }
+    
+    /*
+     * Handle a request for /watch/<playerName> by responding with string representation of
+     * board viewed by player when a change occurs
+     * 
+     * @param exchange HTTP request/response, modified by this method to send a
+     *                 response to the client and close the exchange
+     */
+    private void handleWatch(Board board, HttpExchange exchange) throws IOException {
+        final String path = exchange.getRequestURI().getPath();
+        final String base = exchange.getHttpContext().getPath();
+        assert path.startsWith(base);
+        
+        final String playerName = path.substring(base.length());
+        board.registerPlayer(playerName);
+        final Player player = board.getPlayer(playerName);
+        
+        final String response;
+        
+        exchange.sendResponseHeaders(200, 0);
+        response = board.watch(player);
             
         OutputStream body = exchange.getResponseBody();
         PrintWriter out = new PrintWriter(new OutputStreamWriter(body, UTF_8), true);
