@@ -1,8 +1,5 @@
 package memory;
 
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.lang.Exception;
 
 /**
  * AF(symbol, isUp, isEmpty, owner): 
@@ -10,7 +7,7 @@ import java.lang.Exception;
  *          card carrying symbol, which faces up/down if isUp is true/false, which belongs to player owner.
  *      if isEmpty:
  *          empty card slot
- * RI: if owner is non-empty: !isEmpty and isUp //and owner.contains(card)
+ * RI: if owner is non-empty: !isEmpty and isUp
  * 
  * @author lt
  *
@@ -20,7 +17,7 @@ public class Card {
     private final String symbol;
     private boolean isUp = false;
     private boolean isEmpty = false;
-    private final BlockingQueue<Player> owner=new ArrayBlockingQueue<Player>(1);
+    private Player owner = null;
     
     public Card(String symbol) {
         this.symbol = symbol;
@@ -39,9 +36,15 @@ public class Card {
      * TODO: if non-owner blocks here, should not block owner to relinquish control to avoid deadlock
      * if card was removed while player is waiting, should abort
      */
-    public void setOwner(Player player) {
+    public synchronized void setOwner(Player player) throws EmptyCardException{
         try{
-            owner.put(player);
+            if (owner!=null) {
+                wait();
+            }
+            if (isEmpty) {
+                throw new EmptyCardException();
+            }
+            owner = player;
         }catch(InterruptedException e) {
             e.printStackTrace();
         }
@@ -49,29 +52,30 @@ public class Card {
     }
     
     public boolean isControlled() {
-        return owner.size()>0;
+        return owner!=null;
     }
     
     /*
      * Relinquish control of the card.
      */
     public synchronized void relinquish() {
-        owner.clear();
+        owner=null;
         checkRep();
+        notifyAll();
     }
     
     /*
      * Returns owner, or null if owner is empty
      */
     public Player getOwner() {
-        return owner.peek();
+        return owner;
     }
     
     public boolean isUp() {
         return isUp;
     }
     
-    public synchronized void setUp(boolean result) {
+    public void setUp(boolean result) {
         isUp = result;
     }
     
@@ -96,11 +100,10 @@ public class Card {
         else return "up "+symbol;
     }
     
-    private synchronized void checkRep() {
+    private void checkRep() {
         if (isControlled()) {
             assert !isEmpty;
             assert isUp;
-            assert getOwner().contains(this);
         }
     }
     
@@ -110,6 +113,6 @@ public class Card {
         String face = isUp? "up" : "down";
         Player player = getOwner();
         String playerID = player==null? "":player.getName();
-        return face+" "+symbol+playerID;
+        return face+playerID+" "+symbol;
         }
 }

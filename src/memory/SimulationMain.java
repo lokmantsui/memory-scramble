@@ -23,7 +23,7 @@ public class SimulationMain {
         final String filename = "boards/ab.txt";
         final Board board = Board.parseFromFile(filename);
         final int size = 5;
-        final int players = 1;
+        final int players = 2;
         final int tries = 20;
         
         for (int ii = 0; ii < players; ii++) {

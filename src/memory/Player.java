@@ -30,14 +30,7 @@ public class Player {
     public int getScore() {
         return score;
     }
-    
-    public void turnUpOwnAdd(Card card) {
-        card.setUp(true);
-        turned.add(card);
-        card.setOwner(this);
-        checkRep();
-    }
-    
+        
     public boolean contains(Card card) {
         return turned.contains(card);
     }
@@ -68,11 +61,23 @@ public class Player {
             if (card.isEmpty()) {//1-A Empty card
                 return ;
             }
-            turnUpOwnAdd(card);// 1-BCD down card, up not controlled, up controlled
+            try{
+                card.setUp(true);// 1-B down card
+                card.setOwner(this); //1-CD, up not controlled, up controlled
+                turned.add(card);
+            }catch(EmptyCardException e) {
+                return ;
+            }
         }else if (size()==1) {
             status = Status.NOMATCH;
             if (!card.isEmpty() && !(card.isUp() && card.isControlled())) { //2-CDE
-                turnUpOwnAdd(card); //2-CDE down card, up not controlled, should not block
+                try{
+                    card.setUp(true);// 2-C down card
+                    card.setOwner(this); //2-DE up not controlled, should not block
+                    turned.add(card);
+                }catch(EmptyCardException e) {
+                    throw new RuntimeException("should not reach here");
+                }
                 if (turned.get(0).getSymbol().equals(turned.get(1).getSymbol())) { //2-D Matched
                     status = Status.MATCH;
                 } //2-E not Matched
@@ -83,7 +88,6 @@ public class Player {
         }else {
             throw new RuntimeException("should not reach here");
         }
-        
     }
     
     /*
@@ -94,7 +98,7 @@ public class Player {
             for (Card c:turned) {
                 c.remove();
             }
-            relinguishAll();
+            relinguishAll(); //TODO: tell waiting threads to abort
             score+=1;
         }else { //3-B Not matched
             for (Card c:turned) {
