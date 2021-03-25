@@ -4,10 +4,16 @@ import java.util.List;
 import java.util.ArrayList;
 
 /**
+ * Mutable Player
+ * 
  * AF(name, turned, status, score) = player with name name, under status status, who has turned over cards in turned 
  * RI: turned.size()<=2, and ( UNFINISHED or (NOMATCH and turned.size()>0) or (MATCH and turned.size()==2))
  * Safety from rep exposure:
  *    All fields are private, the mutable List turned is never returned
+ * Thread safety argument:
+ *  state changes only occur through turnOver() (which is synchronized on player instance), 
+ *      relinguishAll(), takeOwnership() and finish() are private and only exposed to client by triggering turnOver(),
+ *       which forms an atomic operation.
  * 
  */
 public class Player {
@@ -93,7 +99,7 @@ public class Player {
      * @param card Card to be taken over. Requires card to be non-empty and uncontrolled.
      * @param eventNotifier Callback to get change notification by calling eventNotifier.notifyAll();
      */
-    private void takeOwnership(Card card, Object eventNotifier) throws EmptyCardException{
+    private synchronized void takeOwnership(Card card, Object eventNotifier) throws EmptyCardException{
         if (!card.isUp()) {//1-B down card; 2-C down card,
             card.setUp(true);
             synchronized (eventNotifier) {
@@ -109,7 +115,7 @@ public class Player {
      * 
      * @param eventNotifier Callback to get change notification by calling eventNotifier.notifyAll();
      */
-    private void finish(Object eventNotifier) {
+    private synchronized void finish(Object eventNotifier) {
         if (status==Status.MATCH) { //3-A Matched
             relinguishAll();
             for (Card c:turned) {

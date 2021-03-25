@@ -99,6 +99,7 @@ public class WebServerTest {
         testIO(board,"/flip/Alice/1,1",List.of("3x3","up R","down","down","down","my Y","down","down","down","down"));
         testIO(board,"/flip/Bob/0,2",List.of("3x3","my R","down","my R","down","up Y","down","down","down","down"));
         testIO(board,"/flip/Bob/1,0",List.of("3x3","none","down","none","my G","up Y","down","down","down","down"));
+        testIO(board,"/look/Alice",List.of("3x3","none","down","none","up G","my Y","down","down","down","down"));
     }
             
     

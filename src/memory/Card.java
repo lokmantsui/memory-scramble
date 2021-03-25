@@ -2,12 +2,22 @@ package memory;
 
 
 /**
+ * Mutable Card
+ * 
  * AF(symbol, isUp, isEmpty, owner): 
  *      if !isEmpty: 
  *          card carrying symbol, which faces up/down if isUp is true/false, which belongs to player owner.
  *      if isEmpty:
  *          empty card slot
- * RI: if owner is non-empty: !isEmpty and isUp
+ * RI: if owner is non-empty: !isEmpty and isUp, 
+ *                              and owner.contains(card) 
+ * Safety from rep exposure:
+ *      all fields are private. 
+ * Thread safety:
+ *      setOwner is always followed by Player.turned.add in synchronized block
+ *      isEmpty is set to true only through remove() in synchronized block, always following Player.relinguishAll() which removes owner
+ *      isUp is set to false only when owner is empty 
+ *     
  * 
  * @author lt
  *

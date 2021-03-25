@@ -35,14 +35,13 @@ import memory.web.LogFilter;
 public class WebServer {
     
     private final HttpServer server;
-    // TODO other fields
     
     // Abstraction function:
-    //   TODO
+    //   AF(server) = game server
     // Representation invariant:
-    //   TODO
+    //   True
     // Safety from rep exposure:
-    //   TODO
+    //   fields are private final and never exposed to client.
     // Thread safety argument:
     //   TODO
     
@@ -95,7 +94,6 @@ public class WebServer {
         watch.getFilters().addAll(filters);
     }
     
-    // TODO checkRep
     
     /**
      * @return the port on which this server is listening for connections

@@ -12,7 +12,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * TODO specification
+ * Board for memory scramble game.
  * Mutable and threadsafe.
  * 
  * <p>PS4 instructions: the specification of static method
@@ -27,7 +27,9 @@ public class Board {
     // Safety from rep exposure:
     //   All fields are private final
     // Thread safety argument:
-    //   TODO
+    //   R, C are immutable. arr size is fixed upon construction, which
+    //              can only happen through parseFromFile.
+    //   playerDir uses thread safe data type.
 
     private final int R;
     private final int C;
