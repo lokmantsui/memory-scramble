@@ -5,6 +5,7 @@ package memory;
  * 
  */
 public class EmptyCardException extends Exception {
+
     public EmptyCardException() {
         super();
     }

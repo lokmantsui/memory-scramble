@@ -14,8 +14,8 @@ package memory;
  * Safety from rep exposure:
  *      all fields are private. 
  * Thread safety:
- *      setOwner is always followed by Player.turned.add in synchronized block
- *      isEmpty is set to true only through remove() in synchronized block, always following Player.relinguishAll() which removes owner
+ *      setOwner is always followed by Player.turned.add in synchronized block (TODO: lock is on player. should be on card)
+ *      isEmpty is set to true only through remove() in synchronized block(TODO), always following Player.relinguishAll() which removes owner
  *      isUp is set to false only when owner is empty 
  *     
  * 
@@ -84,7 +84,6 @@ public class Card {
     }
     
     public void setUp(boolean result) {
-        boolean prev = isUp;
         isUp = result;
     }
     
